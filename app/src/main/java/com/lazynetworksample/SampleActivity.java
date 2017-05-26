@@ -59,7 +59,7 @@ public class SampleActivity extends Activity implements View.OnClickListener,Cli
 
         tvReadMe.setText("we have received your response, we will update shortly");
         startActivity(new Intent(this,SampleActivityList.class));
-        finish();
+//        finish();
     }
 
     @Override
@@ -77,7 +77,7 @@ public class SampleActivity extends Activity implements View.OnClickListener,Cli
     }
 
     @Override
-    public void execute(String requestJson) {//TODO: why this method need to return boolean  remove it
+    public void execute(String requestJson) {
         Log.i("lazy","executing server command");
         fakeServerThread.start();
     }
@@ -85,6 +85,7 @@ public class SampleActivity extends Activity implements View.OnClickListener,Cli
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        fakeServerThread.deregister();
         networkRecord.deregister();
     }
 }

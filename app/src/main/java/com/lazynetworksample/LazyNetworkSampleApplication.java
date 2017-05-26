@@ -1,6 +1,7 @@
 package com.lazynetworksample;
 
 import android.app.Application;
+import android.content.Context;
 
 import com.lazynetwork.LazyNetwork;
 
@@ -10,10 +11,27 @@ import com.lazynetwork.LazyNetwork;
 
 public class LazyNetworkSampleApplication extends Application {
 
+    private static LazyNetworkSampleApplication instance;
+
+    public static LazyNetworkSampleApplication getInstance() {
+        return instance;
+    }
+
+    public static Context getContext(){
+        return instance;
+        // or return instance.getApplicationContext();
+    }
+
     @Override
     public void onCreate() {
+        instance = this;
         super.onCreate();
         LazyNetwork.init(this);
+//        try {
+//            LazyNetwork.clearAllData();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 }
 

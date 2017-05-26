@@ -9,6 +9,7 @@ import com.lazynetwork.RecordCallback;
 public class FakePojo implements RecordCallback {
     public String name;
     public String id;
+    public boolean checked = false;
 
     FakePojo(String name, String id){
         this.name = name;

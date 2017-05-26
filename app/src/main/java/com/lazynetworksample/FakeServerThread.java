@@ -10,12 +10,14 @@ import java.util.Random;
  * Created by pranav.dixit on 23/05/17.
  */
 
-public class FakeServerThread extends Thread{
+public class FakeServerThread extends Thread {
 
     ClientCallback clientCallback;
     Handler handler;
+    String success = "server success!";
+    String failure ="server failure :(";
 
-    public FakeServerThread(ClientCallback clientCallback,Handler handler){
+    public FakeServerThread(ClientCallback clientCallback, Handler handler) {
         this.clientCallback = clientCallback;
         this.handler = handler;
     }
@@ -25,30 +27,40 @@ public class FakeServerThread extends Thread{
     public void run() {
         super.run();
         try {
-            Thread.sleep(5000);
+            Thread.sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
         Random random = new Random();
-        int num = random.nextInt();
-        if(num%3 != 0){
+        int num = random.nextInt(100);
+        if (num % 2 != 0) {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    clientCallback.success("server success!");
+                    if (clientCallback != null)
+                        clientCallback.success(success);
                 }
             });
-        }else{
+        } else {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    clientCallback.failure("server failure :(");
+                    if (clientCallback != null)
+                        clientCallback.failure(failure);
                 }
             });
 
         }
 
 
+    }
+
+    void register(ClientCallback clientCallback) {
+        this.clientCallback = clientCallback;
+    }
+
+    void deregister() {
+        clientCallback = null;
     }
 }
