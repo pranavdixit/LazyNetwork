@@ -15,6 +15,7 @@ import com.google.gson.Gson;
 import com.lazynetwork.ExecutorCallback;
 import com.lazynetwork.NetworkRecord;
 
+import java.sql.Array;
 import java.util.ArrayList;
 
 /**
@@ -26,6 +27,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
     ArrayList<FakePojo> list;
     NetworkRecord<FakePojo> networkRecord;
     View.OnClickListener listener;
+    ArrayList<FakeServerThread> threadList = new ArrayList<>();
 
     public SampleListAdapter(ArrayList<FakePojo> list, View.OnClickListener listener) {
         this.list = list;
@@ -72,7 +74,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
         FakeServerThread fakeServerThread = new FakeServerThread(this,new Handler());
         fakeServerThread.success = fakePojo.id;
         fakeServerThread.failure = fakePojo.id;
-
+        threadList.add(fakeServerThread);
         fakeServerThread.start();
     }
 
@@ -94,12 +96,16 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
         list.get(position).checked = false;
         notifyItemChanged(position);
 
-        Toast.makeText(LazyNetworkSampleApplication.getContext(),"something went wrong, with "+list.get(position).name+" request ",Toast.LENGTH_LONG).show();
-
+        Toast.makeText(LazyNetworkSampleApplication.getContext(),"something went wrong, with "+list.get(position).name+" request ",Toast.LENGTH_SHORT).show();
         //optional if you want to remove the record and retry it
     }
 
     public void onClickItem(View v, int position){
+        if(list.get(position).checked) {
+            Toast.makeText(LazyNetworkSampleApplication.getContext(),"already uploaded "+list.get(position).name+" data ",Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         networkRecord.createRecord(list.get(position));
         notifyItemChanged(position);
 //
@@ -125,5 +131,9 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
 
     public void destroy(){
         networkRecord.deregister();
+        for (FakeServerThread thread: threadList
+             ) {
+            thread.deregister();
+        }
     }
 }

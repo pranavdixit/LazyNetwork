@@ -30,7 +30,7 @@ public class SampleActivityList extends Activity implements View.OnClickListener
 
         rv = (RecyclerView) findViewById(R.id.list);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        for(int i=0;i<10;i++){
+        for(int i=0;i<20;i++){
             list.add(new FakePojo(""+i,""+i));
         }
         sampleListAdapter = new SampleListAdapter(list,this);
