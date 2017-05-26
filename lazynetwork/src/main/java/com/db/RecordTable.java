@@ -49,7 +49,7 @@ public class RecordTable{
         db.deleteRows(TABLE_NAME,RecordTable.DATA+"= ?",new String[]{data},dbCallback,tag);
     }
 
-    public static <E>void addRecord(String type,String data,DbCallback dbCallback, String tag) throws Exception {
+    public static void addRecord(String type,String data,DbCallback dbCallback, String tag) throws Exception {
 
         db = RecordDbImpl.getInstance();
 
@@ -66,5 +66,13 @@ public class RecordTable{
         ContentValues cv = new ContentValues();
         cv.put(STATUS, status);
         db.update(TABLE_NAME,cv ,DATA+" = ?", new String[]{data},dbCallback,tag);
+    }
+
+    public static void truncateTable(){
+        db.clear(TABLE_NAME);
+    }
+
+    public static void clearType(String type,DbCallback callback,String tag){
+        db.deleteRows(TABLE_NAME,TYPE+" = ?",new String[]{type},callback,tag);
     }
 }

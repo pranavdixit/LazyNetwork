@@ -16,5 +16,8 @@ public interface DBCache {
     <E>void removeRecord(String type, E object) throws Exception;
     ArrayList<RecordPOJO> getRecords(String type);
     void updateRecordStatus(String type,String status,String data) throws Exception;
+    void clearAllData() throws Exception;
+    void clearAllTypeRecords(String type) throws Exception;
+
 
 }

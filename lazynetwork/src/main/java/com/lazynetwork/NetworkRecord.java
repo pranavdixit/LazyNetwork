@@ -24,12 +24,14 @@ public class NetworkRecord<E extends RecordCallback> {
     private String type;
     private ExecutorCallback executor;
     private DBCache cache;
+    private boolean autoRetry = true;
 
     public NetworkRecord(ExecutorCallback executor, String uniqueType) throws Exception {
         this.type = uniqueType;
         this.executor = executor;
         cache = DBCacheImpl.getInsDbCache();
-        executeAllPendingRecords(type);
+        if (autoRetry)
+            executeAllPendingRecords(type);
     }
 
     public void deregister() {
@@ -40,17 +42,17 @@ public class NetworkRecord<E extends RecordCallback> {
         this.executor = executor;
     }
 
-    public void createRecord(E object){
+    public void createRecord(E object) {
         try {
             cache.addRecord(type, object);
         } catch (Exception e) {
             Log.i("lazyNetwork", e.getMessage());
         }
         Gson gson = new Gson();
-        String  data = gson.toJson(object);
+        String data = gson.toJson(object);
         executor.execute(data);
         try {
-            cache.updateRecordStatus(type,RecordTable.Status.SENT,data);
+            cache.updateRecordStatus(type, RecordTable.Status.SENT, data);
         } catch (Exception e) {
             Log.i("lazyNetwork", e.getMessage());
         }
@@ -64,9 +66,9 @@ public class NetworkRecord<E extends RecordCallback> {
         }
     }
 
-    public <T extends RecordCallback>boolean isRecorded(T object, Class<T> clazz) {
+    public <T extends RecordCallback> boolean isRecorded(T object, Class<T> clazz) {
         ArrayList<RecordPOJO> records = cache.getRecords(type);
-        if(records == null)
+        if (records == null)
             return false;
         for (RecordPOJO recordPOJO : records
                 ) {
@@ -79,17 +81,33 @@ public class NetworkRecord<E extends RecordCallback> {
         return false;
     }
 
-    public void executeAllPendingRecords(String type) {
+    public void clear() {
+        try {
+            cache.clearAllTypeRecords(type);
+        } catch (Exception e) {
+            Log.i("lazyNetwork", e.getMessage());
+        }
+    }
+
+    private void executeAllPendingRecords(String type) {
         ArrayList<RecordPOJO> records = cache.getRecords(type);
-        if(records == null)
+        if (records == null)
             return;
         for (RecordPOJO recordPOJO : records
                 ) {
-            if (recordPOJO.getStatus().equals(RecordTable.Status.PENDING)) {
+            if (!recordPOJO.getStatus().equals(RecordTable.Status.DONE)) {
                 executor.execute(recordPOJO.getData());
             }
         }
 
     }
 
+    /**
+     * if true all pending requests will be retried on object creation
+     *
+     * @param autoRetry
+     */
+    public void setAutoRetry(boolean autoRetry) {
+        this.autoRetry = autoRetry;
+    }
 }

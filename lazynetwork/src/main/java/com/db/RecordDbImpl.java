@@ -116,14 +116,14 @@ public class RecordDbImpl implements RecordDB {
     //    delete and return number of rows deleted, to delete all rows pass selection as null
     public void deleteRows(final String table, final String selection, final String[] args,final DbCallback dbCallback,final String tag) {
         if (selection == null) {
-            Log.i("PfDatabase", "selection cannot be null in delete row");
+            Log.i("LazyDatabase", "selection cannot be null in delete row");
             return;
         }
         executorService.execute(new Runnable(){
             @Override
             public void run() {
                 final int rows = database.getWritableDatabase().delete(table, selection, args);
-                Log.i("PfDatabase", "Total number of rows deleted "+rows);
+                Log.i("LazyDatabase", "Total number of rows deleted "+rows);
                 if(dbCallback != null){
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override

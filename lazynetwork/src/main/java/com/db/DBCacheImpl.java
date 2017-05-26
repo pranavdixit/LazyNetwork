@@ -19,10 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
     private Map<String,ArrayList<RecordPOJO>> cache = new ConcurrentHashMap<>();
     private Gson gson = new Gson();
 
-    private final String ALL_RECORDS = "allRecords";
-    private final String ADD_RECORD = "addRecord";
-    private final String DELETE_RECORD = "deleteRecord";
-    private static final String UPDATE_RECORD_SENT = "UPDATE_RECORD_SENT";
+    private static final String ALL_RECORDS = "allRecords";
+    private static final String ADD_RECORD = "addRecord";
+    private static final String DELETE_RECORD = "deleteRecord";
+    private static final String UPDATE_RECORD_SENT = "update_record_sent";
+    private static final String CLEAR_TYPE = "clear_type";
 
     private static DBCache instance = new DBCacheImpl();
 
@@ -69,6 +70,18 @@ import java.util.concurrent.ConcurrentHashMap;
                 break;
             }
         }
+    }
+
+    @Override
+    public void clearAllData() throws Exception {
+        cache.clear();
+        RecordTable.truncateTable();
+    }
+
+    @Override
+    public void clearAllTypeRecords(String type) throws Exception {
+        cache.clear();
+        RecordTable.clearType(type,this,CLEAR_TYPE);
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.db.DBCache;
 import com.db.DBCacheImpl;
 import com.db.RecordDB;
 import com.db.RecordDbImpl;
+import com.db.RecordTable;
 
 /**
  * Created by pranav.dixit on 22/05/17.
@@ -21,5 +22,11 @@ public class LazyNetwork {
         } catch (Exception e) {
             Log.i("lazyNetwork: ","this cannot come");
         }
+    }
+
+    public static void clearAllData() throws Exception {
+
+            DBCacheImpl.getInsDbCache().clearAllData();
+
     }
 }
