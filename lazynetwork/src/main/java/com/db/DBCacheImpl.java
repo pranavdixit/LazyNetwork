@@ -2,11 +2,7 @@ package com.db;
 
 import android.database.Cursor;
 
-import com.google.gson.Gson;
-import com.lazynetwork.RecordCallback;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
  public class DBCacheImpl implements DBCache,DbCallback{
 
     private Map<String,ArrayList<RecordPOJO>> cache = new ConcurrentHashMap<>();
-    private Gson gson = new Gson();
 
     private static final String ALL_RECORDS = "allRecords";
     private static final String ADD_RECORD = "addRecord";
@@ -41,15 +36,13 @@ import java.util.concurrent.ConcurrentHashMap;
     }
 
     @Override
-    public <E>void addRecord(String type, E object) throws Exception {
-        String data = gson.toJson(object);
+    public void addRecord(String type, String data) throws Exception {
         addToCache(type,new RecordPOJO(data,RecordTable.Status.PENDING));
         RecordTable.addRecord(type,data,this,ADD_RECORD);
     }
 
     @Override
-    public <E>void removeRecord(String type, E object) throws Exception {
-        String data = gson.toJson(object);
+    public void removeRecord(String type, String data) throws Exception {
         removeFromCache(type,data);
         RecordTable.removeRecord(data,this,DELETE_RECORD);
     }

@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,14 +14,13 @@ import com.google.gson.Gson;
 import com.lazynetwork.ExecutorCallback;
 import com.lazynetwork.NetworkRecord;
 
-import java.sql.Array;
 import java.util.ArrayList;
 
 /**
  * Created by pranav.dixit on 24/05/17.
  */
 
-public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.SampleViewHolder> implements ExecutorCallback,ClientCallback {
+public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.SampleViewHolder> implements ExecutorCallback<FakePojo>,ClientCallback {
 
     ArrayList<FakePojo> list;
     NetworkRecord<FakePojo> networkRecord;
@@ -59,7 +57,6 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
        }else{
            holder.image.setImageDrawable(LazyNetworkSampleApplication.getContext().getDrawable(R.drawable.ic_cloud_black_24dp));
        }
-//        holder.nameTv.setOnClickListener(this);
     }
 
     @Override
@@ -79,12 +76,23 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
     }
 
     @Override
+    public void recordAdded(FakePojo object) {
+        notifyItemChanged(list.indexOf(object));
+    }
+
+    @Override
+    public void recordRemoved(FakePojo object) {
+        notifyItemChanged(list.indexOf(object));
+    }
+
+    @Override
     public void success(String data) {
         int position = Integer.parseInt(data);
         networkRecord.removeRecord(list.get(position));
 
         list.get(position).checked = true;
-        notifyItemChanged(position);
+
+//        notifyItemChanged(position);
     }
 
     @Override
@@ -94,7 +102,8 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
         networkRecord.removeRecord(list.get(position));
 
         list.get(position).checked = false;
-        notifyItemChanged(position);
+
+//        notifyItemChanged(position);
 
         Toast.makeText(LazyNetworkSampleApplication.getContext(),"something went wrong, with "+list.get(position).name+" request ",Toast.LENGTH_SHORT).show();
         //optional if you want to remove the record and retry it
@@ -107,7 +116,6 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
         }
 
         networkRecord.createRecord(list.get(position));
-        notifyItemChanged(position);
 //
 //        FakeServerThread fakeServerThread = new FakeServerThread(this,new Handler());
 //        fakeServerThread.success = Integer.toHexString(position);

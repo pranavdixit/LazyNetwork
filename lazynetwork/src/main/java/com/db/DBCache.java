@@ -12,8 +12,8 @@ import java.util.HashMap;
 public interface DBCache {
 
     void initCache() throws Exception;
-    <E>void addRecord(String type, E object) throws Exception;
-    <E>void removeRecord(String type, E object) throws Exception;
+    void addRecord(String type, String data) throws Exception;
+    void removeRecord(String type, String data) throws Exception;
     ArrayList<RecordPOJO> getRecords(String type);
     void updateRecordStatus(String type,String status,String data) throws Exception;
     void clearAllData() throws Exception;

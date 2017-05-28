@@ -19,7 +19,7 @@ import com.lazynetwork.NetworkRecord;
  * Created by pranav.dixit on 23/05/17.
  */
 
-public class SampleActivity extends Activity implements View.OnClickListener,ClientCallback,ExecutorCallback{
+public class SampleActivity extends Activity implements View.OnClickListener,ClientCallback,ExecutorCallback<FakePojo>{
 
     Button btnClickMe;
     TextView tvReadMe;
@@ -80,6 +80,16 @@ public class SampleActivity extends Activity implements View.OnClickListener,Cli
     public void execute(String requestJson) {
         Log.i("lazy","executing server command");
         fakeServerThread.start();
+    }
+
+    @Override
+    public void recordAdded(FakePojo object) {
+
+    }
+
+    @Override
+    public void recordRemoved(FakePojo object) {
+
     }
 
     @Override
