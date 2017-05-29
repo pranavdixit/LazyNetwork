@@ -31,7 +31,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
         this.list = list;
         this.listener = listener;
         try {
-            networkRecord = new NetworkRecord<FakePojo>(this, "fakePOJOlist");
+            networkRecord = new NetworkRecord<FakePojo>(this, "fakePOJOlist",FakePojo.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -52,7 +52,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
         holder.nameTv.setText(list.get(position).name);
        if(fakePojo.checked){
            holder.image.setImageDrawable(LazyNetworkSampleApplication.getContext().getDrawable(R.drawable.ic_cloud_done_black_24dp));
-       }else if(networkRecord.isRecorded(fakePojo,FakePojo.class)){
+       }else if(networkRecord.isRecorded(fakePojo)){
            holder.image.setImageDrawable(LazyNetworkSampleApplication.getContext().getDrawable(R.drawable.ic_cloud_upload_black_24dp));
        }else{
            holder.image.setImageDrawable(LazyNetworkSampleApplication.getContext().getDrawable(R.drawable.ic_cloud_black_24dp));
@@ -65,34 +65,13 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
     }
 
     @Override
-    public void execute(String requestJson) {
-        Gson gson = new Gson();
-        FakePojo fakePojo = gson.fromJson(requestJson,FakePojo.class);
-        FakeServerThread fakeServerThread = new FakeServerThread(this,new Handler());
-        fakeServerThread.success = fakePojo.id;
-        fakeServerThread.failure = fakePojo.id;
-        threadList.add(fakeServerThread);
-        fakeServerThread.start();
-    }
-
-    @Override
-    public void recordAdded(FakePojo object) {
-        notifyItemChanged(list.indexOf(object));
-    }
-
-    @Override
-    public void recordRemoved(FakePojo object) {
-        notifyItemChanged(list.indexOf(object));
-    }
-
-    @Override
     public void success(String data) {
         int position = Integer.parseInt(data);
         networkRecord.removeRecord(list.get(position));
 
         list.get(position).checked = true;
 
-//        notifyItemChanged(position);
+        notifyItemChanged(position);
     }
 
     @Override
@@ -103,7 +82,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
 
         list.get(position).checked = false;
 
-//        notifyItemChanged(position);
+        notifyItemChanged(position);
 
         Toast.makeText(LazyNetworkSampleApplication.getContext(),"something went wrong, with "+list.get(position).name+" request ",Toast.LENGTH_SHORT).show();
         //optional if you want to remove the record and retry it
@@ -114,15 +93,17 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
             Toast.makeText(LazyNetworkSampleApplication.getContext(),"already uploaded "+list.get(position).name+" data ",Toast.LENGTH_SHORT).show();
             return;
         }
-
         networkRecord.createRecord(list.get(position));
-//
-//        FakeServerThread fakeServerThread = new FakeServerThread(this,new Handler());
-//        fakeServerThread.success = Integer.toHexString(position);
-//        fakeServerThread.failure = Integer.toHexString(position);
-//
-//        fakeServerThread.start();
+        notifyItemChanged(position);
+    }
 
+    @Override
+    public void execute(FakePojo object) {
+        FakeServerThread fakeServerThread = new FakeServerThread(this,new Handler());
+        fakeServerThread.success = object.id;
+        fakeServerThread.failure = object.id;
+        threadList.add(fakeServerThread);
+        fakeServerThread.start();
     }
 
 

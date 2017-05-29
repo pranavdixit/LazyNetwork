@@ -12,10 +12,11 @@ import java.util.HashMap;
 public interface DBCache {
 
     void initCache() throws Exception;
-    void addRecord(String type, String data) throws Exception;
-    void removeRecord(String type, String data) throws Exception;
+    <E>void initType(String type,Class<E> clazz) throws Exception;
+    void addRecord(String type, RecordCallback data) throws Exception;
+    void removeRecord(String type, RecordCallback data) throws Exception;
     ArrayList<RecordPOJO> getRecords(String type);
-    void updateRecordStatus(String type,String status,String data) throws Exception;
+    void updateRecordStatus(String type,String status,RecordCallback data) throws Exception;
     void clearAllData() throws Exception;
     void clearAllTypeRecords(String type) throws Exception;
 

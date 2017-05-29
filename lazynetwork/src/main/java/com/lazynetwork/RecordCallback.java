@@ -6,6 +6,6 @@ package com.lazynetwork;
 
 public interface RecordCallback {
 
-    boolean recordEqual(Object obj1, Object obj2);
+    boolean recordEqual(Object obj);
 
 }

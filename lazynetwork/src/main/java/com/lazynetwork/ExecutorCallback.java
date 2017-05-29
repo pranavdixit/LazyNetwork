@@ -5,7 +5,5 @@ package com.lazynetwork;
  */
 
 public interface ExecutorCallback <E extends RecordCallback>{
-    void execute(String requestJson);
-    void recordAdded(E object);
-    void recordRemoved(E object);
+    void execute(E object);
 }

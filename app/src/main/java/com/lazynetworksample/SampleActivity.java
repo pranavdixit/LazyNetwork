@@ -4,13 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.lazynetwork.ExecutorCallback;
 import com.lazynetwork.NetworkRecord;
@@ -38,17 +36,18 @@ public class SampleActivity extends Activity implements View.OnClickListener,Cli
         fakeServerThread = new FakeServerThread(this, new Handler());
 
         try {
-            networkRecord = new NetworkRecord<>(this,"fakePOJO");
+            networkRecord = new NetworkRecord<>(this,"fakePOJO",FakePojo.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
         fakePojo = new FakePojo("pranav","abc123");
         checkIsStatusPresent();
 
+
     }
 
     public void checkIsStatusPresent(){
-        if(networkRecord.isRecorded(fakePojo,FakePojo.class)){
+        if(networkRecord.isRecorded(fakePojo)){
             tvReadMe.setText("we have received your response, we will update shortly");
         }
     }
@@ -59,7 +58,6 @@ public class SampleActivity extends Activity implements View.OnClickListener,Cli
 
         tvReadMe.setText("we have received your response, we will update shortly");
         startActivity(new Intent(this,SampleActivityList.class));
-//        finish();
     }
 
     @Override
@@ -72,23 +70,6 @@ public class SampleActivity extends Activity implements View.OnClickListener,Cli
     @Override
     public void failure(final String data) {
         tvReadMe.setText(data);
-//        Toast.makeText(this,data,Toast.LENGTH_LONG).show();
-
-    }
-
-    @Override
-    public void execute(String requestJson) {
-        Log.i("lazy","executing server command");
-        fakeServerThread.start();
-    }
-
-    @Override
-    public void recordAdded(FakePojo object) {
-
-    }
-
-    @Override
-    public void recordRemoved(FakePojo object) {
 
     }
 
@@ -97,5 +78,11 @@ public class SampleActivity extends Activity implements View.OnClickListener,Cli
         super.onDestroy();
         fakeServerThread.deregister();
         networkRecord.deregister();
+    }
+
+    @Override
+    public void execute(FakePojo object) {
+        Log.i("lazy","executing server command");
+        fakeServerThread.start();
     }
 }

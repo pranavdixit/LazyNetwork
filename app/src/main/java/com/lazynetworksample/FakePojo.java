@@ -11,16 +11,18 @@ public class FakePojo implements RecordCallback {
     public String id;
     public boolean checked = false;
 
-    FakePojo(String name, String id){
+    FakePojo(String name, String id) {
         this.name = name;
         this.id = id;
     }
 
     @Override
-    public boolean recordEqual(Object obj1, Object obj2) {
-        FakePojo fakePojo = (FakePojo)obj2;
-        if(id.equals(fakePojo.id))
-        return true;
+    public boolean recordEqual(Object obj2) {
+        if(obj2 instanceof FakePojo) {
+            FakePojo fakePojo = (FakePojo) obj2;
+            if (id.equals(fakePojo.id))
+                return true;
+        }
         return false;
     }
 }

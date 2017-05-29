@@ -1,19 +1,12 @@
 package com.lazynetwork;
 
-import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.db.DBCache;
 import com.db.DBCacheImpl;
-import com.db.RecordDB;
-import com.db.RecordDbImpl;
 import com.db.RecordPOJO;
 import com.db.RecordTable;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 /**
@@ -27,10 +20,11 @@ public class NetworkRecord<E extends RecordCallback> {
     private DBCache cache;
     private boolean autoRetry = true;
 
-    public NetworkRecord(ExecutorCallback executor, String uniqueType) throws Exception {
+    public NetworkRecord(ExecutorCallback executor, String uniqueType,Class<E> clazz) throws Exception {
         this.type = uniqueType;
         this.executor = executor;
         cache = DBCacheImpl.getInsDbCache();
+        cache.initType(type,clazz);
         if (autoRetry)
             executeAllPendingRecords(type);
     }
@@ -43,50 +37,37 @@ public class NetworkRecord<E extends RecordCallback> {
         this.executor = executor;
     }
 
-//    public void createRecord(E object) {
-//        Gson gson = new Gson();
-//        String data = gson.toJson(object);
-//        try {
-//            cache.addRecord(type, data);
-//        } catch (Exception e) {
-//            Log.i("lazyNetwork", e.getMessage());
-//        }
-//        executor.execute(data);
-//        try {
-//            cache.updateRecordStatus(type, RecordTable.Status.SENT, data);
-//        } catch (Exception e) {
-//            Log.i("lazyNetwork", e.getMessage());
-//        }
-//    }
-//
-//    public void removeRecord(E object) {
-//        Gson gson = new Gson();
-//        String data = gson.toJson(object);
-//        try {
-//            cache.removeRecord(type, data);
-//        } catch (Exception e) {
-//            Log.i("lazyNetwork", e.getMessage());
-//        }
-//    }
-
     public void createRecord(E object) {
-        new ParseObject(object, ParseObject.ADD).execute();
+        try {
+            cache.addRecord(type, object);
+        } catch (Exception e) {
+            Log.i("lazyNetwork", e.getMessage());
+        }
+        executor.execute(object);
+        try {
+            cache.updateRecordStatus(type, RecordTable.Status.SENT, object);
+        } catch (Exception e) {
+            Log.i("lazyNetwork", e.getMessage());
+        }
     }
 
     public void removeRecord(E object) {
-        new ParseObject(object, ParseObject.REMOVE).execute();
-
+        try {
+            cache.removeRecord(type, object);
+        } catch (Exception e) {
+            Log.i("lazyNetwork", e.getMessage());
+        }
     }
 
-    public <T extends RecordCallback> boolean isRecorded(T object, Class<T> clazz) {
+
+    public boolean isRecorded(E object) {
         ArrayList<RecordPOJO> records = cache.getRecords(type);
         if (records == null)
             return false;
         for (RecordPOJO recordPOJO : records
                 ) {
-            String json = recordPOJO.getData();
-            T object2 = new Gson().fromJson(json, clazz);
-            if (object.recordEqual(object, object2)) {
+            E object2 = (E)recordPOJO.getData();
+            if (object.recordEqual(object2)) {
                 return true;
             }
         }
@@ -121,57 +102,5 @@ public class NetworkRecord<E extends RecordCallback> {
      */
     public void setAutoRetry(boolean autoRetry) {
         this.autoRetry = autoRetry;
-    }
-
-    private class ParseObject extends AsyncTask<String, String, String> {
-        public static final int ADD = 1;
-        public static final int REMOVE = 2;
-
-        private final E object;
-        private int flag;
-
-        public ParseObject(E object, int flag) {
-            this.object = object;
-            this.flag = flag;
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            String data;
-            Gson gson = new Gson();
-            data = gson.toJson(object);
-            return data;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            switch (flag) {
-                case ADD:
-                    try {
-                        cache.addRecord(type, s);
-                    } catch (Exception e) {
-                        Log.i("lazyNetwork", e.getMessage());
-                    }
-                    executor.execute(s);
-                    executor.recordAdded(object);
-                    try {
-                        cache.updateRecordStatus(type, RecordTable.Status.SENT, s);
-                    } catch (Exception e) {
-                        Log.i("lazyNetwork", e.getMessage());
-                    }
-                    break;
-                case REMOVE:
-                    try {
-                        cache.removeRecord(type, s);
-                    } catch (Exception e) {
-                        Log.i("lazyNetwork", e.getMessage());
-                    }
-                    executor.recordRemoved(object);
-                    break;
-
-            }
-
-        }
     }
 }

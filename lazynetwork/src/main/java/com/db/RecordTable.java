@@ -36,7 +36,7 @@ public class RecordTable{
 
     public static void getAllRecordsData(String type,DbCallback dbCallback, String tag) throws Exception {
         db = RecordDbImpl.getInstance();
-        db.asyncQuery(TABLE_NAME,new String[]{RecordTable.DATA},null,null,null,dbCallback,tag);
+        db.asyncQuery(TABLE_NAME,null,TYPE+" = ?",new String[]{type},null,dbCallback,tag);
     }
 
     public static void getAllRecords(DbCallback dbCallback, String tag) throws Exception {

@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
  * Created by pranav.dixit on 19/05/17.
  */
 
-public class RecordDbImpl implements RecordDB {
+class RecordDbImpl implements RecordDB {
     private static volatile RecordDbImpl recordDBImpl;
     private static final int coreSize = 10;
     private static final ExecutorService executorService = Executors.newFixedThreadPool(coreSize);

@@ -7,7 +7,7 @@ import android.database.Cursor;
  * Created by pranav.dixit on 19/05/17.
  */
 
-public interface RecordDB {
+interface RecordDB {
 
     void insert(final String table, final ContentValues cv, final DbCallback dbCallback, final String tag);
     Cursor query(final String table, final String[] columns, final String selection, final String[] args,final String orderBy, final DbCallback dbCallback);

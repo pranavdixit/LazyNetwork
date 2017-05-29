@@ -3,7 +3,7 @@ package com.lazynetworksample;
 import android.app.Application;
 import android.content.Context;
 
-import com.lazynetwork.LazyNetwork;
+import com.db.LazyNetwork;
 
 /**
  * Created by pranav.dixit on 23/05/17.

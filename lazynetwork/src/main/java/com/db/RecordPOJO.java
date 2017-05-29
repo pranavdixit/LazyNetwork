@@ -7,10 +7,10 @@ import com.lazynetwork.RecordCallback;
  */
 
 public class RecordPOJO {
-    private String data;
+    private RecordCallback data;
     private String status;
 
-    public RecordPOJO(String data, String status){
+    public RecordPOJO(RecordCallback data, String status) {
         this.data = data;
         this.status = status;
     }
@@ -23,11 +23,25 @@ public class RecordPOJO {
         this.status = status;
     }
 
-    public String getData() {
+    public RecordCallback getData() {
         return data;
     }
 
-    public void setData(String data) {
+    public void setData(RecordCallback data) {
         this.data = data;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RecordPOJO) {
+            RecordPOJO obj2 = (RecordPOJO) obj;
+            return data.recordEqual(obj2.getData());
+        }
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

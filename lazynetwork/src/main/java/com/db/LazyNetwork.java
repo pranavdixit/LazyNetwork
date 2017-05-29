@@ -1,4 +1,4 @@
-package com.lazynetwork;
+package com.db;
 
 import android.content.Context;
 import android.util.Log;
@@ -18,7 +18,7 @@ public class LazyNetwork {
     public synchronized static void init(Context context){
         RecordDbImpl.init(context);
         try {
-            DBCacheImpl.getInsDbCache().initCache();
+            DBCacheImpl.getInsDbCache();
         } catch (Exception e) {
             Log.i("lazyNetwork: ","this cannot come");
         }
