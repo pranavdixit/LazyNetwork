@@ -2,6 +2,7 @@ package com.db;
 
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.lazynetwork.RecordCallback;
@@ -20,7 +21,6 @@ public class DBCacheImpl implements DBCache, DbCallback {
     private Map<String, ArrayList<RecordPOJO>> cache = new ConcurrentHashMap<>();
     private Map<String, Class> typeMap = new HashMap<>();
 
-    private static final String ALL_RECORDS = "allRecords";
     private static final String ADD_RECORD = "addRecord";
     private static final String DELETE_RECORD = "deleteRecord";
     private static final String UPDATE_RECORD_SENT = "update_record_sent";
@@ -213,7 +213,7 @@ public class DBCacheImpl implements DBCache, DbCallback {
 
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.i(LazyNetwork.TAG,e.getMessage());
             }
 
         }
@@ -269,7 +269,7 @@ public class DBCacheImpl implements DBCache, DbCallback {
 
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.i(LazyNetwork.TAG,e.getMessage());
             }
 
         }

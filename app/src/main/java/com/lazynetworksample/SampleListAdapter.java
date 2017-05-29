@@ -3,6 +3,7 @@ package com.lazynetworksample;
 import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +34,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
         try {
             networkRecord = new NetworkRecord<FakePojo>(this, "fakePOJOlist",FakePojo.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.i("SampleApp",e.getMessage());
         }
 
     }

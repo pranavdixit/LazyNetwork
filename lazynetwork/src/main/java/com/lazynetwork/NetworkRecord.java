@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.db.DBCache;
 import com.db.DBCacheImpl;
+import com.db.LazyNetwork;
 import com.db.RecordPOJO;
 import com.db.RecordTable;
 
@@ -41,13 +42,13 @@ public class NetworkRecord<E extends RecordCallback> {
         try {
             cache.addRecord(type, object);
         } catch (Exception e) {
-            Log.i("lazyNetwork", e.getMessage());
+            Log.i(LazyNetwork.TAG, e.getMessage());
         }
         executor.execute(object);
         try {
             cache.updateRecordStatus(type, RecordTable.Status.SENT, object);
         } catch (Exception e) {
-            Log.i("lazyNetwork", e.getMessage());
+            Log.i(LazyNetwork.TAG, e.getMessage());
         }
     }
 
@@ -55,7 +56,7 @@ public class NetworkRecord<E extends RecordCallback> {
         try {
             cache.removeRecord(type, object);
         } catch (Exception e) {
-            Log.i("lazyNetwork", e.getMessage());
+            Log.i(LazyNetwork.TAG, e.getMessage());
         }
     }
 
@@ -78,7 +79,7 @@ public class NetworkRecord<E extends RecordCallback> {
         try {
             cache.clearAllTypeRecords(type);
         } catch (Exception e) {
-            Log.i("lazyNetwork", e.getMessage());
+            Log.i(LazyNetwork.TAG, e.getMessage());
         }
     }
 

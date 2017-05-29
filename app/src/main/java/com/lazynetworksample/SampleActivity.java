@@ -38,7 +38,7 @@ public class SampleActivity extends Activity implements View.OnClickListener,Cli
         try {
             networkRecord = new NetworkRecord<>(this,"fakePOJO",FakePojo.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.i("SampleApp",e.getMessage());
         }
         fakePojo = new FakePojo("pranav","abc123");
         checkIsStatusPresent();

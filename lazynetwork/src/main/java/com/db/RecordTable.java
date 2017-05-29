@@ -13,6 +13,11 @@ import static android.R.attr.tag;
  */
 
 public class RecordTable{
+
+    private RecordTable(){
+
+    }
+
     public static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " + RecordTable.TABLE_NAME + "(" +
             RecordTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             RecordTable.TYPE + " TEXT, " +
@@ -26,7 +31,7 @@ public class RecordTable{
     public static final String DATA = "data";
     public static final String STATUS = "status";
 
-    public static interface Status{
+    public interface Status{
         String PENDING = "pending";
         String SENT = "sent";
         String DONE = "done";

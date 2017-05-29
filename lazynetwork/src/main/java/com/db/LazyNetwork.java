@@ -15,12 +15,18 @@ import com.db.RecordTable;
 
 public class LazyNetwork {
 
+    public static final String TAG = "LazyNetwrok";
+
+    private LazyNetwork(){
+
+    }
+
     public synchronized static void init(Context context){
         RecordDbImpl.init(context);
         try {
             DBCacheImpl.getInsDbCache();
         } catch (Exception e) {
-            Log.i("lazyNetwork: ","this cannot come");
+            Log.i("lazyNetwork: ","this cannot come "+e.getMessage());
         }
     }
 
