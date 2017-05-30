@@ -72,6 +72,8 @@ public class DBCacheImpl implements DBCache, DbCallback {
 
                 }
             }, TYPE_RECORDS);
+        }else if (networkRecord.isAutoRetry()) {
+            networkRecord.executeAllPendingRecords(type);
         }
     }
 
