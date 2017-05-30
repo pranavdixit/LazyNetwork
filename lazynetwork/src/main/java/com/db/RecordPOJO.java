@@ -7,12 +7,15 @@ import com.lazynetwork.RecordCallback;
  */
 
 public class RecordPOJO {
+    private final String uid;
     private RecordCallback data;
     private String status;
+    private int id;
 
-    public RecordPOJO(RecordCallback data, String status) {
+    public RecordPOJO(RecordCallback data, String status, String uid) {
         this.data = data;
         this.status = status;
+        this.uid = uid;
     }
 
     public String getStatus() {
@@ -29,6 +32,18 @@ public class RecordPOJO {
 
     public void setData(RecordCallback data) {
         this.data = data;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUid() {
+        return uid;
     }
 
     @Override

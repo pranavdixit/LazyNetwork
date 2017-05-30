@@ -6,4 +6,5 @@ package com.lazynetwork;
 
 public interface ExecutorCallback <E extends RecordCallback>{
     void execute(E object);
+    void onCacheUpdated();
 }

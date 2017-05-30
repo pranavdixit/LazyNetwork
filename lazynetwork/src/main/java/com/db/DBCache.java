@@ -1,5 +1,7 @@
 package com.db;
 
+import com.lazynetwork.ExecutorCallback;
+import com.lazynetwork.NetworkRecord;
 import com.lazynetwork.RecordCallback;
 
 import java.util.ArrayList;
@@ -12,7 +14,7 @@ import java.util.HashMap;
 public interface DBCache {
 
     void initCache() throws Exception;
-    <E>void initType(String type,Class<E> clazz) throws Exception;
+    <E extends RecordCallback> void initType(String type, final Class<E> clazz, final ExecutorCallback<E> executorCallback,NetworkRecord networkRecord) throws Exception;
     void addRecord(String type, RecordCallback data) throws Exception;
     void removeRecord(String type, RecordCallback data) throws Exception;
     ArrayList<RecordPOJO> getRecords(String type);

@@ -27,7 +27,7 @@ public class FakeServerThread extends Thread {
     public void run() {
         super.run();
         try {
-            Thread.sleep(10000);
+            Thread.sleep(13000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -47,7 +47,7 @@ public class FakeServerThread extends Thread {
                 @Override
                 public void run() {
                     if (clientCallback != null)
-                        clientCallback.failure(failure);
+                        clientCallback.success(failure);
                 }
             });
 

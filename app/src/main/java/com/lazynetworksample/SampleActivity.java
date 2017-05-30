@@ -85,4 +85,9 @@ public class SampleActivity extends Activity implements View.OnClickListener,Cli
         Log.i("lazy","executing server command");
         fakeServerThread.start();
     }
+
+    @Override
+    public void onCacheUpdated() {
+
+    }
 }

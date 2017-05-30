@@ -6,15 +6,17 @@ import android.database.Cursor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.UUID;
+
 import static android.R.attr.tag;
 
 /**
  * Created by pranav.dixit on 19/05/17.
  */
 
-public class RecordTable{
+public class RecordTable {
 
-    private RecordTable(){
+    private RecordTable() {
 
     }
 
@@ -22,7 +24,8 @@ public class RecordTable{
             RecordTable.ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             RecordTable.TYPE + " TEXT, " +
             RecordTable.DATA + " TEXT, " +
-            RecordTable.STATUS + " INTEGER )";
+            RecordTable.STATUS + " INTEGER, " +
+            RecordTable.UID + " TEXT)";
 
 
     public static final String TABLE_NAME = "records";
@@ -30,8 +33,9 @@ public class RecordTable{
     public static final String TYPE = "type";
     public static final String DATA = "data";
     public static final String STATUS = "status";
+    public static final String UID = "uid";
 
-    public interface Status{
+    public interface Status {
         String PENDING = "pending";
         String SENT = "sent";
         String DONE = "done";
@@ -39,22 +43,22 @@ public class RecordTable{
 
     private static RecordDB db;
 
-    public static void getAllRecordsData(String type,DbCallback dbCallback, String tag) throws Exception {
+    public static void getAllRecordsData(String type, DbCallback dbCallback, String tag) throws Exception {
         db = RecordDbImpl.getInstance();
-        db.asyncQuery(TABLE_NAME,null,TYPE+" = ?",new String[]{type},null,dbCallback,tag);
+        db.asyncQuery(TABLE_NAME, null, TYPE + " = ?", new String[]{type}, null, dbCallback, tag);
     }
 
     public static void getAllRecords(DbCallback dbCallback, String tag) throws Exception {
         db = RecordDbImpl.getInstance();
-        db.asyncQuery(TABLE_NAME,null,null,null,null,dbCallback,tag);
+        db.asyncQuery(TABLE_NAME, null, null, null, null, dbCallback, tag);
     }
 
-    public static void removeRecord(String data,DbCallback dbCallback, String tag) throws Exception {
+    public static void removeRecord(String uid, DbCallback dbCallback, String tag) throws Exception {
         db = RecordDbImpl.getInstance();
-        db.deleteRows(TABLE_NAME,RecordTable.DATA+"= ?",new String[]{data},dbCallback,tag);
+        db.deleteRows(TABLE_NAME, RecordTable.UID + "= ?", new String[]{uid}, dbCallback, tag);
     }
 
-    public static void addRecord(String type,String data,DbCallback dbCallback, String tag) throws Exception {
+    public static void addRecord(String type, String data,String uid, DbCallback dbCallback, String tag) throws Exception {
 
         db = RecordDbImpl.getInstance();
 
@@ -62,22 +66,23 @@ public class RecordTable{
         cv.put(DATA, data);
         cv.put(STATUS, Status.PENDING);
         cv.put(TYPE, type);
+        cv.put(UID, uid);
 
-        db.insert(TABLE_NAME,cv,dbCallback,tag);
+        db.insert(TABLE_NAME, cv, dbCallback, tag);
     }
 
-    public static void updateRecordStatus(String status,String data,DbCallback dbCallback,String tag) throws Exception {
+    public static void updateRecordStatus(String status, String data, DbCallback dbCallback, String tag) throws Exception {
         db = RecordDbImpl.getInstance();
         ContentValues cv = new ContentValues();
         cv.put(STATUS, status);
-        db.update(TABLE_NAME,cv ,DATA+" = ?", new String[]{data},dbCallback,tag);
+        db.update(TABLE_NAME, cv, UID + " = ?", new String[]{data}, dbCallback, tag);
     }
 
-    public static void truncateTable(){
+    public static void truncateTable() {
         db.clear(TABLE_NAME);
     }
 
-    public static void clearType(String type,DbCallback callback,String tag){
-        db.deleteRows(TABLE_NAME,TYPE+" = ?",new String[]{type},callback,tag);
+    public static void clearType(String type, DbCallback callback, String tag) {
+        db.deleteRows(TABLE_NAME, TYPE + " = ?", new String[]{type}, callback, tag);
     }
 }

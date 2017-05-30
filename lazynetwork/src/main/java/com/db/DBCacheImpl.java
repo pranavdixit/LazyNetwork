@@ -5,12 +5,15 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.lazynetwork.ExecutorCallback;
+import com.lazynetwork.NetworkRecord;
 import com.lazynetwork.RecordCallback;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -45,25 +48,13 @@ public class DBCacheImpl implements DBCache, DbCallback {
     }
 
     @Override
-    public <E> void initType(String type, final Class<E> clazz) throws Exception {
+    public <E extends RecordCallback> void initType(String type, final Class<E> clazz, final ExecutorCallback<E> executorCallback, final NetworkRecord networkRecord) throws Exception {
         if (!typeMap.containsKey(type)) {
             typeMap.put(type, clazz);
             RecordTable.getAllRecordsData(type, new DbCallback() {
                 @Override
                 public void onQueryResult(Cursor cursor, String tag) {
-                    cursor.moveToFirst();
-                    while (!cursor.isAfterLast()) {
-
-                        String type = cursor.getString(cursor.getColumnIndex(RecordTable.TYPE));
-                        String data = cursor.getString(cursor.getColumnIndex(RecordTable.DATA));
-                        String status = cursor.getString(cursor.getColumnIndex(RecordTable.STATUS));
-
-                        ParseToObject<E> parseToObject = new ParseToObject(type, data, ParseToObject.ADD_TO_CACHE, clazz);
-                        parseToObject.setStatus(status);
-                        parseToObject.execute();
-
-                        cursor.moveToNext();
-                    }
+                    new UpdateCacheTaskt<E>(cursor, clazz, executorCallback, networkRecord).execute();
                 }
 
                 @Override
@@ -86,15 +77,16 @@ public class DBCacheImpl implements DBCache, DbCallback {
 
     @Override
     public void addRecord(String type, RecordCallback data) throws Exception {
-        addToCache(type, new RecordPOJO(data, RecordTable.Status.PENDING));
-        new ParseToString(type, data, ParseToString.ADD).execute();
-
+        RecordPOJO recordPOJO = new RecordPOJO(data, RecordTable.Status.PENDING, UUID.randomUUID().toString());
+        if (addToCache(type, recordPOJO))
+            new ParseToString(type, recordPOJO, ParseToString.ADD).execute();
     }
 
     @Override
     public void removeRecord(String type, RecordCallback data) throws Exception {
-        removeFromCache(type, data);
-        new ParseToString(type, data, ParseToString.REMOVE).execute();
+        RecordPOJO recordPOJO = removeFromCache(type, data);
+        if (recordPOJO != null)
+            new ParseToString(type, recordPOJO, ParseToString.REMOVE).execute();
 
     }
 
@@ -110,7 +102,7 @@ public class DBCacheImpl implements DBCache, DbCallback {
                 ) {
             if (record.getData().recordEqual(data)) {
                 record.setStatus(status);
-                new ParseToString(type, data, ParseToString.UPDATE);
+                new ParseToString(type, record, ParseToString.UPDATE);
                 break;
             }
         }
@@ -148,17 +140,20 @@ public class DBCacheImpl implements DBCache, DbCallback {
 
     }
 
-    private void addToCache(String type, RecordPOJO recordPOJO) {
+    private boolean addToCache(String type, RecordPOJO recordPOJO) {
         ArrayList<RecordPOJO> recordList = cache.get(type);
         if (recordList == null) {
             recordList = new ArrayList<>();
             cache.put(type, recordList);
         }
-        if (!recordList.contains(recordPOJO))
+        if (!recordList.contains(recordPOJO)) {
             recordList.add(recordPOJO);
+            return true;
+        }
+        return false;
     }
 
-    private <E> void removeFromCache(String type, E data) {
+    private <E> RecordPOJO removeFromCache(String type, E data) {
         ArrayList<RecordPOJO> recordList = cache.get(type);
         if (recordList != null) {
             Iterator<RecordPOJO> iterator = recordList.iterator();
@@ -166,10 +161,11 @@ public class DBCacheImpl implements DBCache, DbCallback {
                 RecordPOJO recordPOJO = iterator.next();
                 if (recordPOJO.getData().recordEqual(data)) {
                     iterator.remove();
-                    break;
+                    return recordPOJO;
                 }
             }
         }
+        return null;
     }
 
     private class ParseToString extends AsyncTask<String, String, String> {
@@ -177,11 +173,11 @@ public class DBCacheImpl implements DBCache, DbCallback {
         public static final int REMOVE = 2;
         public static final int UPDATE = 3;
 
-        private final RecordCallback object;
+        private final RecordPOJO object;
         private int flag;
         private String type;
 
-        public ParseToString(String type, RecordCallback object, int flag) {
+        public ParseToString(String type, RecordPOJO object, int flag) {
             this.object = object;
             this.flag = flag;
             this.type = type;
@@ -191,7 +187,7 @@ public class DBCacheImpl implements DBCache, DbCallback {
         protected String doInBackground(String... params) {
             String data;
             Gson gson = new Gson();
-            data = gson.toJson(object);
+            data = gson.toJson(object.getData());
             return data;
         }
 
@@ -201,77 +197,77 @@ public class DBCacheImpl implements DBCache, DbCallback {
             try {
                 switch (flag) {
                     case ADD:
-                        RecordTable.addRecord(type, s, DBCacheImpl.this, ADD_RECORD);
+                        RecordTable.addRecord(type, s, object.getUid(), DBCacheImpl.this, ADD_RECORD);
                         break;
                     case REMOVE:
-                        RecordTable.removeRecord(s, DBCacheImpl.this, DELETE_RECORD);
+                        RecordTable.removeRecord(object.getUid(), DBCacheImpl.this, DELETE_RECORD);
                         break;
 
                     case UPDATE:
-                        RecordTable.updateRecordStatus(RecordTable.Status.SENT, s, DBCacheImpl.this, UPDATE_RECORD_SENT);
+                        RecordTable.updateRecordStatus(RecordTable.Status.SENT, object.getUid(), DBCacheImpl.this, UPDATE_RECORD_SENT);
                         break;
 
                 }
             } catch (Exception e) {
-                Log.i(LazyNetwork.TAG,e.getMessage());
+                Log.i(LazyNetwork.TAG, e.getMessage());
             }
 
         }
     }
 
-    private class ParseToObject<E> extends AsyncTask<String, String, E> {
+    private class UpdateCacheTaskt<E extends RecordCallback> extends AsyncTask<String, String, String> {
 
         public static final int ADD_TO_CACHE = 1;
 
-        private final String data;
-        private int flag;
-        private String type;
-        private String recordStatus;
+        private Cursor cursor;
         private Class<E> clazz;
+        private ExecutorCallback<E> executorCallback;
+        NetworkRecord networkRecord;
 
-        public ParseToObject(String type, String data, int flag, Class<E> clazz) {
-            this.data = data;
-            this.flag = flag;
-            this.type = type;
+        public UpdateCacheTaskt(Cursor cursor, Class<E> clazz, ExecutorCallback<E> executorCallback, NetworkRecord networkRecord) {
+            this.cursor = cursor;
             this.clazz = clazz;
+            this.executorCallback = executorCallback;
+            this.networkRecord = networkRecord;
         }
 
-        public String getRecordStatus() {
-            return recordStatus;
-        }
-
-        public void setStatus(String status) {
-            this.recordStatus = status;
-        }
 
         @Override
-        protected E doInBackground(String... params) {
-            Gson gson = new Gson();
-            E object = gson.fromJson(data, clazz);
-            return object;
-        }
+        protected String doInBackground(String... params) {
+            String type = "";
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
 
-        @Override
-        protected void onPostExecute(E s) {
-            super.onPostExecute(s);
-            try {
-                switch (flag) {
-                    case ADD_TO_CACHE:
-                        ArrayList<RecordPOJO> recordList = cache.get(type);
-                        if (recordList == null) {
-                            recordList = new ArrayList<>();
-                            cache.put(type, recordList);
-                        }
-                        if (s instanceof RecordCallback) {
-                            recordList.add(new RecordPOJO((RecordCallback) s, recordStatus));
-                        }
-                        break;
+                String uid = cursor.getString(cursor.getColumnIndex(RecordTable.UID));
+                type = cursor.getString(cursor.getColumnIndex(RecordTable.TYPE));
+                String data = cursor.getString(cursor.getColumnIndex(RecordTable.DATA));
+                String status = cursor.getString(cursor.getColumnIndex(RecordTable.STATUS));
 
+                Gson gson = new Gson();
+                E object = gson.fromJson(data, clazz);
+
+                ArrayList<RecordPOJO> recordList = cache.get(type);
+                if (recordList == null) {
+                    recordList = new ArrayList<>();
+                    cache.put(type, recordList);
                 }
-            } catch (Exception e) {
-                Log.i(LazyNetwork.TAG,e.getMessage());
-            }
+                if (object instanceof RecordCallback) {
+                    recordList.add(new RecordPOJO((RecordCallback) object, status, uid));
+                }
 
+                cursor.moveToNext();
+            }
+            return type;
         }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            executorCallback.onCacheUpdated();
+            if (networkRecord.isAutoRetry())
+                networkRecord.executeAllPendingRecords(s);
+        }
+
     }
+
 }

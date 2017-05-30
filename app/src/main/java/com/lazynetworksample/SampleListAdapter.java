@@ -107,6 +107,11 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Sa
         fakeServerThread.start();
     }
 
+    @Override
+    public void onCacheUpdated() {
+        notifyDataSetChanged();
+    }
+
 
     public static final class SampleViewHolder extends ViewHolder {
         TextView nameTv;

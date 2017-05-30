@@ -25,9 +25,7 @@ public class NetworkRecord<E extends RecordCallback> {
         this.type = uniqueType;
         this.executor = executor;
         cache = DBCacheImpl.getInsDbCache();
-        cache.initType(type,clazz);
-        if (autoRetry)
-            executeAllPendingRecords(type);
+        cache.initType(type,clazz,executor,this);
     }
 
     public void deregister() {
@@ -83,7 +81,7 @@ public class NetworkRecord<E extends RecordCallback> {
         }
     }
 
-    private void executeAllPendingRecords(String type) {
+    public void executeAllPendingRecords(String type) {
         ArrayList<RecordPOJO> records = cache.getRecords(type);
         if (records == null)
             return;
@@ -103,5 +101,9 @@ public class NetworkRecord<E extends RecordCallback> {
      */
     public void setAutoRetry(boolean autoRetry) {
         this.autoRetry = autoRetry;
+    }
+
+    public boolean isAutoRetry() {
+        return autoRetry;
     }
 }
