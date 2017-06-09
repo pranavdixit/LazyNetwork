@@ -8,6 +8,7 @@ import com.db.LazyNetwork;
 import com.db.RecordPOJO;
 import com.db.RecordTable;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 /**
@@ -21,11 +22,11 @@ public class NetworkRecord<E extends RecordCallback> {
     private DBCache cache;
     private boolean autoRetry = true;
 
-    public NetworkRecord(ExecutorCallback executor, String uniqueType,Class<E> clazz) throws Exception {
+    public NetworkRecord(ExecutorCallback executor, String uniqueType, Class<E> clazz) throws Exception {
         this.type = uniqueType;
         this.executor = executor;
         cache = DBCacheImpl.getInsDbCache();
-        cache.initType(type,clazz,executor,this);
+        cache.initType(type, clazz, executor, this);
     }
 
     public void deregister() {
@@ -65,12 +66,24 @@ public class NetworkRecord<E extends RecordCallback> {
             return false;
         for (RecordPOJO recordPOJO : records
                 ) {
-            E object2 = (E)recordPOJO.getData();
+            E object2 = (E) recordPOJO.getData();
             if (object.recordEqual(object2)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public ArrayList<E> getRecords() {
+        ArrayList<RecordPOJO> list = cache.getRecords(type);
+        ArrayList<E> result = new ArrayList<>();
+        if (list != null) {
+            for (RecordPOJO pojo : list
+                    ) {
+                result.add((E) pojo.getData());
+            }
+        }
+        return result;
     }
 
     public void clear() {
