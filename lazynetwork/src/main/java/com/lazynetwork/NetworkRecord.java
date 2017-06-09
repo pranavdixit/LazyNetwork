@@ -80,7 +80,11 @@ public class NetworkRecord<E extends RecordCallback> {
         if (list != null) {
             for (RecordPOJO pojo : list
                     ) {
-                result.add((E) pojo.getData());
+                try {
+                    result.add((E) pojo.getData());
+                }catch (ClassCastException e){
+                    Log.i(LazyNetwork.TAG, ""+e.getMessage());
+                }
             }
         }
         return result;
