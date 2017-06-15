@@ -29,6 +29,25 @@ public class NetworkRecord<E extends RecordCallback> {
         cache.initType(type, clazz, executor, this);
     }
 
+    public NetworkRecord(ExecutorCallback executor, String uniqueType) throws Exception {
+        this.type = uniqueType;
+        this.executor = executor;
+        cache = DBCacheImpl.getInsDbCache();
+        executeAllPendingRecords(uniqueType);
+        if(isAutoRetry()){
+            executeAllPendingRecords(type);
+        }
+    }
+
+    public NetworkRecord(ExecutorCallback executor, String uniqueType, Boolean autoRetry) throws Exception {
+        this.type = uniqueType;
+        this.executor = executor;
+        cache = DBCacheImpl.getInsDbCache();
+        this.autoRetry = autoRetry;
+        if (autoRetry)
+            executeAllPendingRecords(uniqueType);
+    }
+
     public void deregister() {
         executor = null;
     }
@@ -82,8 +101,8 @@ public class NetworkRecord<E extends RecordCallback> {
                     ) {
                 try {
                     result.add((E) pojo.getData());
-                }catch (ClassCastException e){
-                    Log.i(LazyNetwork.TAG, ""+e.getMessage());
+                } catch (ClassCastException e) {
+                    Log.i(LazyNetwork.TAG, "" + e.getMessage());
                 }
             }
         }

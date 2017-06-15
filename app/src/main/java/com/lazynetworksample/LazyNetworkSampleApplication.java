@@ -18,6 +18,7 @@ public class LazyNetworkSampleApplication extends Application {
     }
 
     public static Context getContext(){
+
         return instance;
         // or return instance.getApplicationContext();
     }
@@ -27,6 +28,7 @@ public class LazyNetworkSampleApplication extends Application {
         instance = this;
         super.onCreate();
         LazyNetwork.init(this);
+        LazyNetwork.registerRecordTypes("my_pojo",FakePojo.class);
 //        try {
 //            LazyNetwork.clearAllData();
 //        } catch (Exception e) {

@@ -27,7 +27,7 @@ public class FakeServerThread extends Thread {
     public void run() {
         super.run();
         try {
-            Thread.sleep(10000);
+            Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

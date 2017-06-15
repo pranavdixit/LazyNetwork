@@ -36,15 +36,8 @@ public class DBCacheImpl implements DBCache, DbCallback {
 
     }
 
-    ;
-
     public static DBCache getInsDbCache() {
         return instance;
-    }
-
-    @Override
-    public void initCache() throws Exception {
-        // Cache is initialized for as per Record Type demand and not at once.
     }
 
     @Override
@@ -76,6 +69,36 @@ public class DBCacheImpl implements DBCache, DbCallback {
             networkRecord.executeAllPendingRecords(type);
         }
     }
+
+    public <E extends RecordCallback> void initType(String type, final Class<E> clazz) throws Exception {
+        if (!typeMap.containsKey(type)) {
+            typeMap.put(type, clazz);
+            RecordTable.getAllRecordsData(type, new DbCallback() {
+                @Override
+                public void onQueryResult(Cursor cursor, String tag) {
+                    new UpdateCacheTask<E>(cursor, clazz).execute();
+                }
+
+                @Override
+                public void onResultInserted(long id, String tag) {
+
+                }
+
+                @Override
+                public void onResultDeleted(long id, String tag) {
+
+                }
+
+                @Override
+                public void onResultUpdated(int rows, String tag) {
+
+                }
+            }, TYPE_RECORDS);
+        }
+    }
+
+
+
 
     @Override
     public void addRecord(String type, RecordCallback data) throws Exception {
@@ -268,6 +291,54 @@ public class DBCacheImpl implements DBCache, DbCallback {
             executorCallback.onCacheUpdated();
             if (networkRecord.isAutoRetry())
                 networkRecord.executeAllPendingRecords(s);
+        }
+
+    }
+
+    private class UpdateCacheTask<E extends RecordCallback> extends AsyncTask<String, String, String> {
+
+        public static final int ADD_TO_CACHE = 1;
+
+        private Cursor cursor;
+        private Class<E> clazz;
+
+        public UpdateCacheTask(Cursor cursor, Class<E> clazz) {
+            this.cursor = cursor;
+            this.clazz = clazz;
+        }
+
+
+        @Override
+        protected String doInBackground(String... params) {
+            String type = "";
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+
+                String uid = cursor.getString(cursor.getColumnIndex(RecordTable.UID));
+                type = cursor.getString(cursor.getColumnIndex(RecordTable.TYPE));
+                String data = cursor.getString(cursor.getColumnIndex(RecordTable.DATA));
+                String status = cursor.getString(cursor.getColumnIndex(RecordTable.STATUS));
+
+                Gson gson = new Gson();
+                E object = gson.fromJson(data, clazz);
+
+                ArrayList<RecordPOJO> recordList = cache.get(type);
+                if (recordList == null) {
+                    recordList = new ArrayList<>();
+                    cache.put(type, recordList);
+                }
+                if (object instanceof RecordCallback) {
+                    recordList.add(new RecordPOJO(object, status, uid));
+                }
+
+                cursor.moveToNext();
+            }
+            return type;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
         }
 
     }

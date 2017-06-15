@@ -19,6 +19,7 @@ public class SampleActivityList extends Activity implements View.OnClickListener
     Button btnClickMe;
     RecyclerView rv;
     SampleListAdapter sampleListAdapter;
+    MyPojoAdapter myPojoAdapter;
     ArrayList<FakePojo> list = new ArrayList<>();
 
     @Override
@@ -34,18 +35,19 @@ public class SampleActivityList extends Activity implements View.OnClickListener
             list.add(new FakePojo(""+i,""+i));
         }
         sampleListAdapter = new SampleListAdapter(list,this);
+        myPojoAdapter = new MyPojoAdapter(list,this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        rv.setAdapter(sampleListAdapter);
+        rv.setAdapter(myPojoAdapter);
 
     }
 
     @Override
     public void onClick(View v) {
-        sampleListAdapter.onClickItem(v,rv.getChildLayoutPosition(v));
+        myPojoAdapter.onClickItem(v,rv.getChildLayoutPosition(v));
 //        startActivity(new Intent(this,SampleActivity.class));
 
     }
